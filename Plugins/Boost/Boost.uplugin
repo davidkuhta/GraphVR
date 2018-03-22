@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Boost",
+	"Description": "UE4 Integration of the Boost C++ Library",
+	"Category": "Other",
+	"CreatedBy": "David Kuhta",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "Boost",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}
