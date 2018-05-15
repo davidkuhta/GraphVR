@@ -1,4 +1,5 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
 
 #include "IGVPawn.h"
 
@@ -285,7 +286,7 @@ void AIGVPawn::OnRightTriggerButtonReleased()
 }
 
 void AIGVPawn::OnLeftGripPressed()
-{	
+{
 	auto Hand = EControllerHand::Left;
 	auto PROrigin = PickRayInformation[Hand].Key;
 	auto PRRotation = PickRayInformation[Hand].Value;
@@ -408,7 +409,7 @@ void AIGVPawn::OnLeftThumbstickReleased()
 
 void AIGVPawn::OnATouched()
 {
-	
+
 }
 
 void AIGVPawn::OnATouchReleased()
@@ -471,7 +472,7 @@ void AIGVPawn::UpdateGraphDetailsWidget()
 	int32 FOV = GraphActor->FieldOfView;
 	FString FOVString = FString::FromInt(FOV);
 	FOVString += FString("deg");
-	
+
 	auto HighlightedLevelScale = GraphActor->HighlightedLevelScale;
 	int32 PickedCount = 0;
 	for (AIGVNodeActor* const Node : GraphActor->Nodes)

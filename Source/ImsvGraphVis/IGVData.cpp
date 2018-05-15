@@ -1,4 +1,5 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
 
 #include "IGVData.h"
 
@@ -14,7 +15,7 @@
 
 #include "Boost.h" //DPK
 
-#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/adjacency_list.hpp> //DPK
 
 FString UIGVData::DefaultDataDirPath()
 {
@@ -175,6 +176,8 @@ void UIGVData::DeserializeClusters(TArray<TSharedPtr<FJsonValue>> const& Cluster
 	}
 }
 
+
+// Test case for implementing Boost Library Graph
 void UIGVData::testGraph() //DPK
 {
 	enum family

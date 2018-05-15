@@ -1,4 +1,5 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
 
 #pragma once
 
@@ -70,7 +71,7 @@ public:
 	bool IsDefaultRenderGroup() const;
 	bool IsHighlightedRenderGroup() const;
 	bool IsRemainedRenderGroup() const;
-	bool IsHiddenRenderGroup() const;
+	bool IsHiddenRenderGroup() const;  //DPK
 	void UpdateRenderGroup();
 
 	void BeginTransition();

@@ -1,4 +1,5 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
 
 #include "IGVEdgeMeshData.h"
 

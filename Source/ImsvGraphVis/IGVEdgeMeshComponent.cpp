@@ -1,4 +1,5 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
 
 #include "IGVEdgeMeshComponent.h"
 
@@ -18,6 +19,7 @@ UMaterialInterface* GetEdgeMaterial()
 	return MaterialAsset.Succeeded() ? MaterialAsset.Object->GetMaterial() : nullptr;
 }
 
+// Added to support "Hide Node" feature
 UMaterialInterface* GetTranslucentEdgeMaterial()
 {
 	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialAsset(
@@ -42,7 +44,7 @@ UIGVEdgeMeshComponent::UIGVEdgeMeshComponent()
 	SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 
 	GetEdgeMaterial();
-	GetTranslucentEdgeMaterial();
+	GetTranslucentEdgeMaterial(); //DPK
 }
 
 void UIGVEdgeMeshComponent::Init(AIGVGraphActor* const InGraphActor,

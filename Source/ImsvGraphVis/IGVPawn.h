@@ -1,4 +1,5 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
 
 #pragma once
 
@@ -7,7 +8,7 @@
 
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "MotionControllerComponent.h"
-#include "InputCoreTypes.h" 
+#include "InputCoreTypes.h"
 #include "Components/WidgetComponent.h" //DPK
 
 #include "IGVNodeDetailWidgetComponent.h"
@@ -52,7 +53,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = ImmersiveGraphVisualization)
 	FVector PickRayDirection;
-	
+
 	/* Motion Controllers */
 	UPROPERTY(EditDefaultsOnly, Category = ImmersiveGraphVisualization)
 	class UMotionControllerComponent* LeftHandComponent;

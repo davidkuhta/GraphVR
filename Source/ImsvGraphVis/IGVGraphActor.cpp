@@ -1,4 +1,6 @@
 // Copyright 2017 Oh-Hyun Kwon. All Rights Reserved.
+// Copyright 2018 David Kuhta. All Rights Reserved for additions.
+// All code pertaining to Louvain algorithm belongs to it's respective owners.
 
 #include "IGVGraphActor.h"
 
@@ -17,7 +19,6 @@
 #include "IGVPawn.h"
 #include "IGVPlayerController.h"
 #include "IGVTreemapLayout.h"
-
 
 UMaterialInterface* GetOutlineMaterial()
 {
@@ -100,15 +101,19 @@ AIGVGraphActor::AIGVGraphActor()
 	ResetAmbientOcclusion();
 
 	GetOutlineMaterial();
-	
+
+  // Initialize Http Module
 	Http = &FHttpModule::Get();
 
+  // Initialize Last Picked Node Mapping to Left and Right controllers.
 	LastPickedNodeMap.Add(EControllerHand::Left, nullptr);
 	LastPickedNodeMap.Add(EControllerHand::Right, nullptr);
 
+  // Initialize Last Nearest Node Mapping to Left and Right controllers.
 	LastNearestNodeMap.Add(EControllerHand::Left, nullptr);
 	LastNearestNodeMap.Add(EControllerHand::Right, nullptr);
 
+  // Initialize Pick Ray Distance Sorted Node Mapping to Left and Right controllers.
 	PickRayDistSortedNodesHandMap.Add(EControllerHand::Left, FPickRaySortedNodesArray());
 	PickRayDistSortedNodesHandMap.Add(EControllerHand::Right, FPickRaySortedNodesArray());
 
@@ -139,9 +144,10 @@ void AIGVGraphActor::BeginPlay()
 	{
 		IGV_LOG_S(Warning, TEXT("Unable to find Pawn"));
 	}
-	
+
 	OutlineMaterialInstance = UMaterialInstanceDynamic::Create(GetOutlineMaterial(), this);
 
+  // Call the Neo4j Graph Database to retrieve the nodes and edges.
 	HttpCallNode();
 	HttpCallEdge();
 
@@ -160,6 +166,7 @@ void AIGVGraphActor::Tick(float DeltaTime)
 	UpdateEdgeMeshes();
 }
 
+// Remove all Nodes, Edges, and Clusters. In addition, clear all mappings
 void AIGVGraphActor::EmptyGraph()
 {
 	for (AIGVNodeActor* Node : Nodes)
@@ -175,33 +182,27 @@ void AIGVGraphActor::EmptyGraph()
 	RightPickRayDistSortedNodes.Empty();
 
 	PickRayDistSortedNodesHandMap.Empty(); //DPK Added
-	
+
 	LastNearestNode = nullptr;
 	LastPickedNode = nullptr;
-
-	//LeftPickRayDistSortedNodes.Empty();
-	//RightPickRayDistSortedNodes.Empty();
-	//LastNearestNodeMap.Empty();
-	//LastPickedNodeMap.Empty();
 }
 
+// Reset Graph by removing old elements and re-querying the Neo4j database
 void AIGVGraphActor::ResetGraph()
 {
-
-
 	EmptyGraph();
 	HttpCallNode();
 	HttpCallEdge();
 }
 
+// Remove all clusters and mappings, reconstruct the graph from the current
+// nodes and edges.
 void AIGVGraphActor::RedrawGraph()
 {
 	Clusters.Empty();
 
 	LastNearestNode = nullptr;
 	LastPickedNode = nullptr;
-	//LastPickedNodeMap.Empty();
-	//LastNearestNodeMap.Empty();
 
 	for (FIGVEdge& Edge : Edges) {
 		Edge.Clusters.Empty();
@@ -210,9 +211,7 @@ void AIGVGraphActor::RedrawGraph()
 		Edge.ClusterLevelsBeforeTransition.Empty();
 		Edge.ClusterLevelsAfterTransition.Empty();
 	}
-
-	//SetupEdges();
-	ConstructClusters(); // DPK
+	ConstructClusters();
 	SetupClusters();
 	UpdateColors();
 	UpdateTreemapLayout();
@@ -223,7 +222,7 @@ void AIGVGraphActor::SetupGraph()
 {
 	SetupNodes();
 	SetupEdges();
-	ConstructClusters(); // DPK
+	ConstructClusters(); // Construct clusters natively using the Louvain algo
 	SetupClusters();
 	UpdateColors();
 	UpdateTreemapLayout();
@@ -255,9 +254,6 @@ void AIGVGraphActor::SetupNodes()
 		IGV_LOG(Log, TEXT("Node: %s"), *Node->ToString());
 	}
 
-	//auto leftNodes = PickRayDistSortedNodesHandMap[EControllerHand::Left].Nodes.Num();
-	//auto rightNodes = PickRayDistSortedNodesHandMap[EControllerHand::Right].Nodes.Num();
-	//IGV_LOG(Log, TEXT("PickRay Dist - Left: %d, Right: %d"), leftNodes, rightNodes);
 }
 
 void AIGVGraphActor::SetupEdges()
@@ -276,6 +272,7 @@ void AIGVGraphActor::SetupEdges()
 		IGV_LOG(Log, TEXT("Edge: %s"), *Edge.ToString());
 	}
 }
+
 
 void AIGVGraphActor::SetupClusters()
 {
@@ -303,7 +300,6 @@ void AIGVGraphActor::SetupClusters()
 		IGV_LOG(Log, TEXT("Cluster: %s"), *Cluster.ToString());
 	}
 
-	//DPK WHY is this called
 	for (FIGVEdge& Edge : Edges)
 	{
 		IGV_LOG(Log, TEXT("Clusters for Edge: %s"), *Edge.ToString());
@@ -311,6 +307,7 @@ void AIGVGraphActor::SetupClusters()
 	}
 }
 
+// Utilize Louvain algorithm to generate clusterings for given nodes and edges.
 void AIGVGraphActor::ConstructClusters()
 {
 	int type = UNWEIGHTED;
@@ -341,7 +338,7 @@ void AIGVGraphActor::ConstructClusters()
 	srand(time(NULL) + _getpid());
 
 	unsigned short nb_calls = 0;
-	
+
 	GraphB gb(data_stream, type);
 	InitQuality(&gb, nb_calls);
 	nb_calls++;
@@ -376,7 +373,7 @@ void AIGVGraphActor::ConstructClusters()
 		if (display_level == -1)*/
 		processed_links = c.display_partitionKR(cumulative, improvement);
 
-		
+
 		///Testing
 		const vector<pair<int, int> >::const_iterator link_begin(processed_links.begin());
 		const vector<pair<int, int> >::const_iterator link_end(processed_links.end());
@@ -422,7 +419,7 @@ void AIGVGraphActor::ConstructClusters()
 
 	//for (int i = 0; i < links.Num(); i++) {
 	//	//TTuple<int, int> link = links[i];
-	//	
+	//
 	//	IGV_LOG(Log, TEXT("Link: %d"), links[i].Get<0>());
 	//}
 
@@ -633,7 +630,7 @@ void AIGVGraphActor::UpdateInteraction()
 	bool ShowImages;
 	TArray<enum class EControllerHand> PickRayInformationKeys;
 	PickRayDistSortedNodesHandMap.GenerateKeyArray(PickRayInformationKeys);
-	
+
 	IGV_LOG(Log, TEXT("PickRayInformationKeys: %d"), PickRayInformationKeys.Num());
 
 	UpdateNodeDistanceToPickRay(); // Can pull this into for loop?
@@ -678,7 +675,7 @@ void AIGVGraphActor::UpdateInteraction()
 		}
 
 		AIGVNodeActor* LastPickedNode = LastPickedNodeMap[HandKey];
-		
+
 		// update picked node
 		if (NearestNode->IsPicked(HandKey))  // nearest node actor is picked node actor
 		{
@@ -802,7 +799,7 @@ void AIGVGraphActor::UpdateNodeDistanceToPickRay()
 		/*Node->DistanceToPickRay = FMath::PointDistToLine(
 			Node->GetActorLocation(), Pawn->PickRayDirection, Pawn->PickRayOrigin);*/
 	}
-	
+
 	/*LeftPickRayDistSortedNodes.Sort([](AIGVNodeActor const& A, AIGVNodeActor const& B) {
 		return A.DistanceToPickRays[EControllerHand::Left] < B.DistanceToPickRays[EControllerHand::Left];
 	});
@@ -1236,7 +1233,7 @@ void AIGVGraphActor::OnResponseReceivedEdge(FHttpRequestPtr Request, FHttpRespon
 	{
 		FAResponse NeoResponse;
 		FJsonObjectConverter::JsonObjectStringToUStruct<FAResponse>(JsonString, &NeoResponse, 0, 0);
-		
+
 		for (int i = 0, nodes = NeoResponse.results[0].data.Num(); i < nodes; i++) {
 			int32 sourceIdx = NeoMap[NeoResponse.results[0].data[i].meta[0].id];
 			int32 targetIdx = NeoMap[NeoResponse.results[0].data[i].meta[1].id];
